@@ -143,15 +143,33 @@ var EnhancedFixedDataTable = (function() {
 // Generates qTip when string length is larger than 20
   var QtipWrapper = React.createClass({displayName: "QtipWrapper",
     render: function() {
-      var label = this.props.label, qtipFlag = false;
+      var label = this.props.label, qtipFlag = false, attr = this.props.attr;
       var shortLabel = this.props.shortLabel;
       var className = this.props.className || '';
 
       if (label && shortLabel && label.toString().length > shortLabel.toString().length) {
         qtipFlag = true;
       }
+      if (window.hasOwnProperty('cbio') && cbio.hasOwnProperty('util')) {
+        if (attr === 'CASE_ID') {
+          shortLabel = React.createElement("a", {target: "_blank", 
+                          href: cbio.util.getLinkToSampleView(cancerStudyId, label)}, shortLabel)
+        } else if (attr === 'PATIENT_ID') {
+          shortLabel = React.createElement("a", {target: "_blank", 
+                          href: cbio.util.getLinkToPatientView(cancerStudyId, label)}, shortLabel)
+        }
+      }
+
+      if (attr === 'COPY_NUMBER_ALTERATIONS' && !isNaN(label)) {
+        if (Number(label) < 0.01) {
+          shortLabel = '< 0.01';
+        } else {
+          shortLabel = Number(shortLabel).toFixed(2);
+        }
+
+      }
       return (
-        React.createElement("span", {className: className + (qtipFlag?" hasQtip " : ''), 
+        React.createElement("span", {className: className + (qtipFlag ? 'hasQtip' : ''), 
               "data-qtip": label}, 
         shortLabel
       )
@@ -437,7 +455,8 @@ var EnhancedFixedDataTable = (function() {
         React.createElement(Cell, {columnKey: field}, 
         React.createElement("span", {style: flag ? {backgroundColor:'yellow'} : {}}, 
             React.createElement(QtipWrapper, {label: data[rowIndex].row[field], 
-                         shortLabel: shortLabels[data[rowIndex].index][field]})
+                         shortLabel: shortLabels[data[rowIndex].index][field], 
+                         attr: field})
         )
         )
       );
@@ -603,9 +622,7 @@ var EnhancedFixedDataTable = (function() {
                   rulerWidth = ruler.outerWidth();
                   break;
                 default:
-                  var upperCaseLength = data.replace(/[^A-Z]/g, "").length;
-                  var dataLength = data.length;
-                  rulerWidth = upperCaseLength * 10 +  (dataLength - upperCaseLength) * 8 + 15;
+                  rulerWidth = data.toString().toUpperCase().length * 9;
                   break;
               }
 
@@ -649,14 +666,12 @@ var EnhancedFixedDataTable = (function() {
                 _labelWidth = ruler.outerWidth();
                 break;
               default:
-                var upperCaseLength = _label.replace(/[^A-Z]/g, "").length;
-                var dataLength = _label.length;
-                _labelWidth = upperCaseLength * 10 +  (dataLength - upperCaseLength) * 8 + 15;
+                _labelWidth = _label.toString().toUpperCase().length * 9;
                 break;
             }
             if (_labelWidth > columnWidth[attr]) {
               var end = Math.floor(_label.length * columnWidth[attr] / _labelWidth) - 3;
-              _labelShort = _label.substring(0, end) + '...';
+              _labelShort = _label.toString().substring(0, end) + '...';
             } else {
               _labelShort = _label;
             }
@@ -682,14 +697,12 @@ var EnhancedFixedDataTable = (function() {
               _labelWidth = ruler.outerWidth() + 70;
               break;
             default:
-              var upperCaseLength = _label.replace(/[^A-Z]/g, "").length;
-              var dataLength = _label.length;
-              _labelWidth = upperCaseLength * 10 +  (dataLength - upperCaseLength) * 8 + 20;
+              _labelWidth = _label.toString().toUpperCase().length * 12 + 20;
               break;
           }
           if (_labelWidth > columnWidth[col.name]) {
             var end = Math.floor(_label.length * columnWidth[col.name] / _labelWidth) - 3;
-            _shortLabel = _label.substring(0, end) + '...';
+            _shortLabel = _label.toString().substring(0, end) + '...';
           } else {
             _shortLabel = _label;
           }
@@ -956,8 +969,8 @@ var EnhancedFixedDataTable = (function() {
       var cols = [], rows = [], rowsDict = {}, attributes = this.props.input.attributes,
         data = this.props.input.data, dataLength = data.length, col, cell, i, filters = {},
         uniqueId = this.props.uniqueId || 'id', newCol,
-        measureMethod = (dataLength > 100000 || !this.props.autoColumnWidth) ? 'charNum' : 'jquery',
-        columnMinWidth = this.props.groupHeader ? 130 : 50; //The minimum width to at least fit in number slider.
+        measureMethod = dataLength > 100000 ? 'charNum' : 'jquery',
+        columnMinWidth = this.props.groupHeader ? 150 : 50; //The minimum width to at least fit in number slider.
 
       // Gets column info from input
       var colsDict = {};
