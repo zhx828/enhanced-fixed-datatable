@@ -4,9 +4,19 @@
 
 'use strict';
 
-var url = "data/test_data_acc_tcga.json";
+// var url = "data/test_data_mskimpact.json";
+var url = "http://localhost:8080/cbioportal/webservice.do";
 
-$.getJSON(url, function(json) {
+$.ajax({
+  type: 'POST',
+  url: url,
+  data: {
+    cmd: 'getClinicalData',
+    format: 'json',
+    cancer_study_id: 'mskimpact',
+    case_set_id: 'mskimpact_all'
+  }
+}).done(function(json) {
   // Configuration options:
 
   // Required:
@@ -22,6 +32,17 @@ $.getJSON(url, function(json) {
   //      default value is true
   //  scroller - column scroller option; type of boolean; default value is false
   //  fixed - fixed columns; type of array; elements can be number or string; default value is []
+
+  json.attributes.push({
+    attr_id: 'sample',
+    datatype: 'STRING',
+    display_name: 'SAMPLE ID',
+    fixed: true
+  });
+
+  _.each(json.attributes, function(item) {
+   item.column_width = 100;
+  });
 
   var testElement = <EnhancedFixedDataTable
     input={json}
@@ -41,7 +62,7 @@ $.getJSON(url, function(json) {
     maxHeight={500}
     headerHeight={30}
     groupHeaderHeight={40}
-    autoColumnWidth={true}
+    autoColumnWidth={false}
     columnMaxWidth={300}
     columnSorting={false}
     isResizable={true}
