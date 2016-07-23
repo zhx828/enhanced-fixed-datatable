@@ -56,9 +56,9 @@ $.ajax({
     groupHeader={true}
     fixedChoose={true}
     fixed={['CASE_ID', 'PATIENT_ID']}
-    uniqueId="CASE_ID"
+    uniqueId="sample"
     rowHeight={30}
-    tableWidth={1150}
+    tableWidth={940}
     maxHeight={500}
     headerHeight={30}
     groupHeaderHeight={40}
