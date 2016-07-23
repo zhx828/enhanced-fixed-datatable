@@ -970,6 +970,8 @@ var EnhancedFixedDataTable = (function() {
 
       // Gets column info from input
       var colsDict = {};
+
+      uniqueId = uniqueId.toUpperCase();
       for (i = 0; i < attributes.length; i++) {
         col = attributes[i];
         col.attr_id = col.attr_id !== 'sample' ? col.attr_id.toUpperCase() : 'sample';
@@ -1001,6 +1003,7 @@ var EnhancedFixedDataTable = (function() {
       // Gets data rows from input
       for (i = 0; i < dataLength; i++) {
         cell = data[i];
+        cell.attr_id = cell.attr_id.toString().toUpperCase();
         if (!rowsDict[cell[uniqueId]]) {
           rowsDict[cell[uniqueId]] = {};
         }
